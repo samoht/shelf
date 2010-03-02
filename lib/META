@@ -1,0 +1,10 @@
+version = "0.1.0"
+requires = "dyntype.syntax"
+
+package "syntax" (
+  version = "0.1"
+  description = "ocaml-shelve: an collection of syntax extensions to serialize OCaml values"
+  requires = "dyntype.syntax"
+  archive(syntax,preprocessor) = "pa_shelve.cma"
+  archive(syntax,toploop) = "pa_shelve.cma"
+  )
