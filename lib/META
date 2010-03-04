@@ -8,3 +8,10 @@ package "syntax" (
   archive(syntax,preprocessor) = "pa_shelve.cma"
   archive(syntax,toploop) = "pa_shelve.cma"
   )
+
+package "json" (
+  name = "shelf.json"
+  description = "JSON library"
+  archive(byte) = "json.cmo"
+  archive(native) = "json.cmx"
+)
