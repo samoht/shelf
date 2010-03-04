@@ -14,4 +14,3 @@ tests:
 
 clean:
 	cd lib && $(MAKE) clean
-	cd tests && $(MAKE) clean
