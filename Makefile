@@ -9,6 +9,10 @@ install:
 uninstall:
 	cd lib && $(MAKE) libuninstall
 
+reinstall:
+	-$(MAKE) uninstall
+	$(MAKE) install
+
 tests:
 	cd tests && $(MAKE) all
 
