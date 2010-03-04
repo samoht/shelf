@@ -69,7 +69,7 @@ let rec to_fct t f =
 	| Arrow t  -> failwith "Marshalling of functional values is not (yet) supported"
 	| Rec ((v,i), t)
 	| Ext ((v,i), t) ->
-		to_fct (Dict [ ("type", String v); ("id", Int i); ("value", t) ]) f
+		to_fct t f
 	| Var (v,i) ->
 		to_fct (Dict [ ("type", String v); ("id", Int i) ]) f
 
