@@ -1,20 +1,27 @@
+-include Makefile.config
+
 .PHONY: all
-
 all:
-	cd lib && $(MAKE) all
+	$(MAKE) -C lib/
 
-install:
-	cd lib && $(MAKE) libinstall
+.PHONY: test
+test: all
+	$(MAKE) -C lib/
+	$(MAKE) -C lib_test/ run
 
+.PHONY: install
+install: all
+	$(MAKE) -C lib/ libinstall
+
+.PHONY: uninstall
 uninstall:
-	cd lib && $(MAKE) libuninstall
+	$(MAKE) -C lib/ libuninstall
 
+.PHONY: reinstall
 reinstall:
-	-$(MAKE) uninstall
+	$(MAKE) uninstall
 	$(MAKE) install
 
-tests:
-	cd tests && $(MAKE) all
-
+.PHONY: clean
 clean:
-	cd lib && $(MAKE) clean
+	$(MAKE) -C lib/ clean
