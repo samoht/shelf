@@ -48,6 +48,12 @@ let rec to_fct t f =
     | Bool b   -> f (string_of_bool b)
     | Float r  -> f (Printf.sprintf "%f" r)
     | String s -> f (escape_string s)
+    | Enum ( (Tuple [String _;_] :: _) as a )->
+        to_fct (Dict (List.map 
+          (function 
+           | Tuple [String k; v] -> (k, v)
+           | _ -> assert false
+        ) a)) f
     | Enum a   ->
         f "[";
         list_iter_between (fun i -> to_fct i f) (fun () -> f ", ") a;

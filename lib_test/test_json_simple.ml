@@ -3,13 +3,13 @@ open Printf
 
 type x = {
   foo: int;
-  bar: string;
+  bar: (string * string) list;
 } with json
 
 open OUnit
 
 let test_marshal () =
-  let x1 = { foo=1; bar="hello world" } in
+  let x1 = { foo=1; bar=[("hello","world");"one","two"] } in
   let s = json_of_x x1 in
   print_endline s
 
