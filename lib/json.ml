@@ -48,13 +48,10 @@ let rec to_fct t f =
     | Bool b   -> f (string_of_bool b)
     | Float r  -> f (Printf.sprintf "%f" r)
     | String s -> f (escape_string s)
-    | Enum a   -> begin
-                match a with
-                |[i] -> to_fct i f
-                |a -> f "[";
-              list_iter_between (fun i -> to_fct i f) (fun () -> f ", ") a;
-              f "]";
-         end
+    | Enum a   ->
+        f "[";
+        list_iter_between (fun i -> to_fct i f) (fun () -> f ", ") a;
+        f "]"
     | Tuple a  ->
         to_fct (Enum a) f
     | Dict a   ->
@@ -62,6 +59,8 @@ let rec to_fct t f =
         list_iter_between (fun (k, v) -> to_fct (String k) f; f ": "; to_fct v f)
                           (fun () -> f ", ") a;
         f "}"
+    | Sum (v, []) ->
+        to_fct (String v) f
     | Sum (v, args) ->
         to_fct (Enum (String v :: args)) f 
     | Null     -> f "null"
