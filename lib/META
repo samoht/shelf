@@ -3,10 +3,10 @@ requires = "dyntype.syntax"
 
 package "syntax" (
   version = "0.1"
-  description = "ocaml-shelve: an collection of syntax extensions to serialize OCaml values"
+  description = "serialize OCaml values into wire formats like JSON"
   requires = "dyntype.syntax"
-  archive(syntax,preprocessor) = "pa_shelve.cma"
-  archive(syntax,toploop) = "pa_shelve.cma"
+  archive(syntax,preprocessor) = "pa_shelf.cmo"
+  archive(syntax,toploop) = "pa_shelf.cmo"
   )
 
 package "json" (

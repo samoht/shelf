@@ -2,10 +2,10 @@ export OCAMLMAKEFILE = ../OCamlMakefile
 
 ANNOTATE = yes
 
-SOURCES = json.ml html.ml pa_shelve.ml
-RESULT = shelve
+SOURCES = json.ml html.ml pa_shelf.ml
+RESULT = shelf
 LIBINSTALL_FILES = \
-	pa_shelve.a pa_shelve.o pa_shelve.cma pa_shelve.cmi pa_shelve.cmo pa_shelve.cmx pa_shelve.cmxa \
+	pa_shelf.o pa_shelf.cmo pa_shelf.cmi \
 	json.cmx json.cmo json.cmi json.o \
 	html.cmx html.cmo html.cmi html.o
 

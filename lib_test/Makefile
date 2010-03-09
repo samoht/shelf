@@ -5,7 +5,7 @@ ANNOTATE = yes
 run: dc
 	./$(RESULT) -verbose
 
-PACKS = unix oUnit dyntype.value dyntype.syntax shelve.syntax shelve.json
+PACKS = unix oUnit dyntype.value dyntype.syntax shelf.syntax shelf.json
 PREDS = camlp4o
 
 RESULT= run_test
