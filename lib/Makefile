@@ -16,4 +16,10 @@ USE_CAMLP4 = yes
 all: bcl ncl
 	@ :
 
+.PHONY: java javainstall
+java:
+	ocamljava -I +camlp4 -I +site-lib/dyntype -c json.mli json.ml html.ml
+javainstall:
+	cp json.cmj json.jo html.cmj html.jo $(shell ocamlfind printconf path)/shelf/
+
 include $(OCAMLMAKEFILE)
