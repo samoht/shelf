@@ -9,6 +9,7 @@ and  p =
   | One of string * int array
   | Two of t
   | Three of x option list
+  | Four
 
 and pp = [ `Poly1 | `Poly2 | `Poly3 of int ]
 
@@ -33,27 +34,43 @@ type o =
   < x: f; y: x; z: (int -> string) > 
   with json
 
+let i1 = 5l
+let i2 = 6
+let i3 = 7L
+let i4 = ( 100l, 101, 102L)
+let p = One ("foo", [|1;2;3|])
+let p' = Four
+let pp = `Poly2
+let rec t = { t1=1000; t2="t"; t3=x }
+and t' = {t1=1001; t2="t'"; t3=x }
+and x = { x1=[| t; t' |]; x2=9L }
+let f = { f1=1; f2=["f";"f'"]; f3="f3x"; f4=99L; f5=[|'a';'b';'c'|] }
+let tu = ( 3, f, pp )
+let o = object method x=f method y=x method z i = string_of_int i end
+
 open OUnit
 
-let (<=>) n t =
-  let ts = Json.to_string t in
-  printf "%s: %s\n%!" n ts;
-  printf "%s: %s\n%!" n (Json.to_string (Json.of_string ts));
-  ("EQ " ^ n) @? ( t = Json.of_string ts)
+let (<=>) n (f,t,v) =
+  let json = f v in
+  printf "%s: json1= %s\n%!" n json;
+  try
+    let v' = t json in
+    let json' = f v' in
+    printf "%s: json2= %s\n%!" n json';
+    ("EQ " ^ n) @? ( json = json' )
+  with
+    e -> printf "ERR: %s\n%!" (Printexc.to_string e); raise e
 
-let test_marshal () =
-  "i1" <=> type_of_i1;
-  "i2" <=> type_of_i2;
-  "i3" <=> type_of_i3;
-  "i4" <=> type_of_i4;
-  "p"  <=> type_of_p;
-  "pp" <=> type_of_pp;
-  "t"  <=> type_of_t;
-  "x"  <=> type_of_x;
-  "f"  <=> type_of_f;
-  "tu" <=> type_of_tu;
-  "o"  <=> type_of_o
+let test_t ()  = "t"  <=> (json_of_t, t_of_json, t)
+let test_x ()  = "x"  <=> (json_of_x, x_of_json, x)
+let test_f ()  = "f"  <=> (json_of_f, f_of_json, f)
+let test_tu () = "tu" <=> (json_of_tu, tu_of_json, tu)
 
 let suite = [
-  "type_marshal" >::  test_marshal
+  "test_t" >::  test_t;
+  "test_x" >::  test_x
+(*
+  "test_f" >::  test_f;
+  "test_tu" >::  test_tu;
+*)
 ]

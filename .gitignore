@@ -11,3 +11,7 @@
 *.opt
 *.a
 *.cmxa
+*.jo
+*.cmj
+lib_test/run_test
+/Makefile.config
