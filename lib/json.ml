@@ -97,7 +97,8 @@ let rec of_typed_value = function
     | Type.Sum tyl, String v ->
        Sum (v,[])
     | Type.Sum tyl, Enum (String v :: args) ->
-       Sum (v,args)
+       let tyl' = List.assoc v tyl in
+       Sum( v, (List.map2 (fun ty' va' -> of_typed_value (ty', va')) tyl' args))
     | Type.Option ty', v -> of_typed_value (ty',v)
     | Type.Rec (id,ty'), v -> 
        Rec ((id, 0L), (of_typed_value (ty',v)))
