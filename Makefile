@@ -11,11 +11,11 @@ test: all
 
 .PHONY: install
 install: all
-	$(MAKE) -C lib/ libinstall
+	$(SUDO) $(MAKE) -C lib/ libinstall
 
 .PHONY: uninstall
 uninstall:
-	$(MAKE) -C lib/ libuninstall
+	$(SUDO) $(MAKE) -C lib/ libuninstall
 
 .PHONY: reinstall
 reinstall:
