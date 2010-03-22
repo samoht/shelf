@@ -1,0 +1,4 @@
+0.1.0-dev:
+
+* JSON marshalling based on type information [22 Mar 2010]
+* Initial import from Xen Cloud sources [02 Mar 2010] 

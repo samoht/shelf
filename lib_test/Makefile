@@ -9,7 +9,7 @@ PACKS = unix oUnit dyntype.value dyntype.syntax shelf.syntax shelf.json
 PREDS = camlp4o
 
 RESULT= run_test
-TESTS=  test_json_simple
+TESTS=  test_json_simple test_json test_blog
 
 SOURCES= $(TESTS:%=%.ml) suite.ml
 

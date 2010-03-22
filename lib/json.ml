@@ -78,6 +78,37 @@ let rec to_fct t f =
     | Var (v,i) ->
         to_fct (Dict [ ("type", String v); ("id", Int i) ]) f
 
+(* given a type and a string, return well-formed Value *)
+let rec of_typed_value = function
+    | Type.Unit, v
+    | Type.Bool, v 
+    | Type.Float, v
+    | Type.Char, v
+    | Type.String, v
+    | Type.Int _, v -> v
+    | Type.Enum (Type.Tuple [Type.String; ty']), Dict vl ->
+       Enum (List.map (fun (k,v) -> Enum [String k; (of_typed_value (ty',v)) ]) vl)
+    | Type.Enum ty', (Enum l) ->
+       Enum (List.map (fun v -> of_typed_value (ty',v)) l)
+    | Type.Tuple tyl, Enum l ->
+       Tuple (List.map2 (fun ty' v -> of_typed_value (ty',v)) tyl l)
+    | Type.Dict tyl, Dict vl ->
+       Dict (List.map2 (fun (_, _, ty') (k, v) -> k, (of_typed_value (ty',v))) tyl vl)
+    | Type.Sum tyl, String v ->
+       Sum (v,[])
+    | Type.Sum tyl, Enum (String v :: args) ->
+       Sum (v,args)
+    | Type.Option ty', v -> of_typed_value (ty',v)
+    | Type.Rec (id,ty'), v -> 
+       Rec ((id, 0L), (of_typed_value (ty',v)))
+    | Type.Ext (id,ty'), v -> 
+       Ext ((id, 0L), (of_typed_value (ty',v)))
+    | Type.Var id, (Dict [ ("type", String _); ("id", Int i) ]) ->
+          Var (id, i)
+    | Type.Arrow _,_ -> failwith "Unmarshalling of functional values not yet implemented"
+    | ty,v -> failwith (Printf.sprintf "of_typed_value: unknown type=%s value=%s" 
+                (Type.to_string ty) (Value.to_string v))
+
 let to_buffer t buf =
     to_fct t (fun s -> Buffer.add_string buf s)
 
@@ -473,4 +504,5 @@ module Parser = struct
         of_stream next
 end
 
-let of_string = Parser.of_string
+let of_string ty s = of_typed_value (ty, Parser.of_string s)
+

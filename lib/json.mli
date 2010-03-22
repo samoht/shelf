@@ -13,4 +13,4 @@
  *)
 
 val to_string : Value.t -> string
-val of_string : string -> Value.t
+val of_string : Type.t -> string -> Value.t
