@@ -87,7 +87,7 @@ let rec of_typed_value = function
     | Type.String, v
     | Type.Int _, v -> v
     | Type.Enum (Type.Tuple [Type.String; ty']), Dict vl ->
-       Enum (List.map (fun (k,v) -> Enum [String k; (of_typed_value (ty',v)) ]) vl)
+       Enum (List.map (fun (k,v) -> Tuple [String k; (of_typed_value (ty',v)) ]) vl)
     | Type.Enum ty', (Enum l) ->
        Enum (List.map (fun v -> of_typed_value (ty',v)) l)
     | Type.Tuple tyl, Enum l ->
@@ -99,7 +99,8 @@ let rec of_typed_value = function
     | Type.Sum tyl, Enum (String v :: args) ->
        let tyl' = List.assoc v tyl in
        Sum( v, (List.map2 (fun ty' va' -> of_typed_value (ty', va')) tyl' args))
-    | Type.Option ty', v -> of_typed_value (ty',v)
+    | Type.Option ty', Null -> Null
+    | Type.Option ty', v -> Value (of_typed_value (ty',v))
     | Type.Rec (id,ty'), v -> 
        Rec ((id, 0L), (of_typed_value (ty',v)))
     | Type.Ext (id,ty'), v -> 
