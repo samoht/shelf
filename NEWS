@@ -1,4 +1,5 @@
 0.1.0-dev:
 
+* Support different permutation of JSON dict keys [20 Apr 2010]
 * JSON marshalling based on type information [22 Mar 2010]
 * Initial import from Xen Cloud sources [02 Mar 2010] 

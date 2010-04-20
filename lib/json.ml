@@ -93,7 +93,13 @@ let rec of_typed_value = function
     | Type.Tuple tyl, Enum l ->
        Tuple (List.map2 (fun ty' v -> of_typed_value (ty',v)) tyl l)
     | Type.Dict tyl, Dict vl ->
-       Dict (List.map2 (fun (_, _, ty') (k, v) -> k, (of_typed_value (ty',v))) tyl vl)
+       (* need to cope with out of order dictionary entries here *)
+       let d = List.fold_left (fun a (k,v) ->
+           let _,_,ty = List.find (fun (n,_,_) -> n = k) tyl in
+           let v' = of_typed_value (ty,v) in
+           (k,v') :: a
+         ) [] vl in
+       Dict d
     | Type.Sum tyl, String v ->
        Sum (v,[])
     | Type.Sum tyl, Enum (String v :: args) ->
