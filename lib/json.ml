@@ -82,10 +82,12 @@ let rec to_fct t f =
 let rec of_typed_value = function
     | Type.Unit, v
     | Type.Bool, v 
-    | Type.Float, v
     | Type.Char, v
     | Type.String, v
     | Type.Int _, v -> v
+    | Type.Float, Value.String v ->
+       Value.Float (float_of_string v)
+    | Type.Float, v -> v
     | Type.Enum (Type.Tuple [Type.String; ty']), Dict vl ->
        Enum (List.map (fun (k,v) -> Tuple [String k; (of_typed_value (ty',v)) ]) vl)
     | Type.Enum ty', (Enum l) ->
