@@ -11,6 +11,7 @@ package "syntax" (
 
 package "json" (
   name = "shelf.json"
+  requires = "dyntype.value,dyntype.type"
   description = "JSON library"
   archive(byte) = "json.cmo"
   archive(native) = "json.cmx"
