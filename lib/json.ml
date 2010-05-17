@@ -74,14 +74,22 @@ let rec to_fct t f =
     | Null     -> f "null"
     | Value t  -> to_fct t f
     | Arrow t  -> failwith "Marshalling of functional values is not (yet) supported"
-    | Rec ((v,i), t)
+    | Rec ((v,i), t) ->
+        to_fct (Dict [ ("id", Int i); ("value", t) ]) f
     | Ext ((v,i), t) ->
         to_fct t f
     | Var (v,i) ->
-        to_fct (Dict [ ("type", String v); ("id", Int i) ]) f
+        to_fct (Dict [ ("id", Int i) ]) f
+
+let runtime_error (ty,v) =
+    failwith (Printf.sprintf "of_typed_value: unknown type=%s value=%s" 
+        (Type.to_string ty) (Value.to_string v))
+
+let count = ref 0L
 
 (* given a type and a string, return well-formed Value *)
-let rec of_typed_value = function
+let rec of_typed_value ?(rec_types=[]) ((ty,v) as x) =
+    match x with
     | Type.Unit, v
     | Type.Bool, v 
     | Type.Char, v
@@ -91,35 +99,47 @@ let rec of_typed_value = function
        Value.Float (float_of_string v)
     | Type.Float, v -> v
     | Type.Enum (Type.Tuple [Type.String; ty']), Dict vl ->
-       Enum (List.map (fun (k,v) -> Tuple [String k; (of_typed_value (ty',v)) ]) vl)
+       Enum (List.map (fun (k,v) -> Tuple [String k; (of_typed_value ~rec_types (ty',v)) ]) vl)
     | Type.Enum ty', (Enum l) ->
-       Enum (List.map (fun v -> of_typed_value (ty',v)) l)
+       Enum (List.map (fun v -> of_typed_value ~rec_types (ty',v)) l)
     | Type.Tuple tyl, Enum l ->
-       Tuple (List.map2 (fun ty' v -> of_typed_value (ty',v)) tyl l)
+       Tuple (List.map2 (fun ty' v -> of_typed_value ~rec_types (ty',v)) tyl l)
     | Type.Dict tyl, Dict vl ->
        (* need to cope with out of order dictionary entries here *)
        let d = List.fold_left (fun a (k,v) ->
            let _,_,ty = List.find (fun (n,_,_) -> n = k) tyl in
-           let v' = of_typed_value (ty,v) in
+           let v' = of_typed_value ~rec_types (ty,v) in
            (k,v') :: a
          ) [] vl in
        Dict d
     | Type.Sum tyl, String v ->
        Sum (v,[])
     | Type.Sum tyl, Enum (String v :: args) ->
-       let tyl' = List.assoc v tyl in
-       Sum( v, (List.map2 (fun ty' va' -> of_typed_value (ty', va')) tyl' args))
+       let tyl' = try List.assoc v tyl with _ -> runtime_error x in
+       Sum( v, (List.map2 (fun ty' va' -> of_typed_value ~rec_types (ty', va')) tyl' args))
     | Type.Option ty', Null -> Null
-    | Type.Option ty', v -> Value (of_typed_value (ty',v))
-    | Type.Rec (id,ty'), v -> 
-       Rec ((id, 0L), (of_typed_value (ty',v)))
-    | Type.Ext (id,ty'), v -> 
-       Ext ((id, 0L), (of_typed_value (ty',v)))
-    | Type.Var id, (Dict [ ("type", String _); ("id", Int i) ]) ->
-          Var (id, i)
+    | Type.Option ty', v -> Value (of_typed_value ~rec_types (ty',v))
+    | Type.Rec (name,ty'), Dict [ "id", Int i ] -> Var (name, i)
+    | Type.Ext (name,ty'), Dict [ "id", Int i ] -> Var (name, i)
+    | Type.Rec (name,ty'), Dict d 
+    | Type.Ext (name,ty'), Dict d when List.mem_assoc "id" d ->
+       (* We have a recursive type associated to a cyclic value - need to store the type in
+          the memo list if if not already there, get the id stored in a field and do a recursive
+          call on the sub-value. *)
+       let id = match List.assoc "id" d with Int i -> i | _ -> runtime_error x in
+	   let v = try List.assoc "value" d with _ -> runtime_error x in
+       let rec_types' = if List.mem_assoc name rec_types then rec_types else (name, ty) :: rec_types in
+       Rec ((name, id), (of_typed_value ~rec_types:rec_types' (ty',v)))
+    | Type.Ext (id,ty'), v | Type.Rec (id,ty'), v ->
+       (* As the ID is not very useful here, it has not been marshalled, so we populate the field with
+          an incremented variable *)
+       count := Int64.add !count 1L;
+       Ext ((id, !count), (of_typed_value ~rec_types (ty',v)))
+    | Type.Var name, v ->
+      let ty' = try List.assoc name rec_types with _ -> runtime_error x in
+       of_typed_value ~rec_types (ty', v)
     | Type.Arrow _,_ -> failwith "Unmarshalling of functional values not yet implemented"
-    | ty,v -> failwith (Printf.sprintf "of_typed_value: unknown type=%s value=%s" 
-                (Type.to_string ty) (Value.to_string v))
+    | _ -> runtime_error x
 
 let to_buffer t buf =
     to_fct t (fun s -> Buffer.add_string buf s)
@@ -516,5 +536,7 @@ module Parser = struct
         of_stream next
 end
 
-let of_string ty s = of_typed_value (ty, Parser.of_string s)
+let of_string ty s =
+    count := 0L;
+    of_typed_value (ty, Parser.of_string s)
 
