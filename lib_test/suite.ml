@@ -9,4 +9,4 @@ let suites = [
 
 let _ =
   let s = suites in
-  run_test_tt_main ("ORM" >::: (List.flatten s))
+  run_test_tt_main ("Shelf" >::: (List.flatten s))
