@@ -1,5 +1,7 @@
 (*
- * Copyright (C) 2010 Thomas Gazagnaire <thomas@gazagnaire.com>
+ * Copyright (C) 2009-2010 Thomas Gazagnaire <thomas@gazagnaire.com>
+ * Copyright (C) 2009      Prashanth Mundkur <prashanth.mundkur@gmail.com>
+ *                         Vincent Hanquez   <vincent.hanquez@citrix.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
