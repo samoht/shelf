@@ -141,6 +141,47 @@ let rec of_typed_value ?(rec_types=[]) ((ty,v) as x) =
 	| Type.Arrow _,_ -> failwith "Unmarshalling of functional values not yet implemented"
 	| _ -> runtime_error x
 
+(* given a type and a string, return well-formed Value *)
+let rec of_typed_value = function
+    | Type.Unit, v
+    | Type.Bool, v 
+    | Type.Char, v
+    | Type.String, v
+    | Type.Int _, v -> v
+    | Type.Float, Value.String v ->
+       Value.Float (float_of_string v)
+    | Type.Float, v -> v
+    | Type.Enum (Type.Tuple [Type.String; ty']), Dict vl ->
+       Enum (List.map (fun (k,v) -> Tuple [String k; (of_typed_value (ty',v)) ]) vl)
+    | Type.Enum ty', (Enum l) ->
+       Enum (List.map (fun v -> of_typed_value (ty',v)) l)
+    | Type.Tuple tyl, Enum l ->
+       Tuple (List.map2 (fun ty' v -> of_typed_value (ty',v)) tyl l)
+    | Type.Dict tyl, Dict vl ->
+       (* need to cope with out of order dictionary entries here *)
+       let d = List.fold_left (fun a (k,v) ->
+           let _,_,ty = List.find (fun (n,_,_) -> n = k) tyl in
+           let v' = of_typed_value (ty,v) in
+           (k,v') :: a
+         ) [] vl in
+       Dict d
+    | Type.Sum tyl, String v ->
+       Sum (v,[])
+    | Type.Sum tyl, Enum (String v :: args) ->
+       let tyl' = List.assoc v tyl in
+       Sum( v, (List.map2 (fun ty' va' -> of_typed_value (ty', va')) tyl' args))
+    | Type.Option ty', Null -> Null
+    | Type.Option ty', v -> Value (of_typed_value (ty',v))
+    | Type.Rec (id,ty'), v -> 
+       Rec ((id, 0L), (of_typed_value (ty',v)))
+    | Type.Ext (id,ty'), v -> 
+       Ext ((id, 0L), (of_typed_value (ty',v)))
+    | Type.Var id, (Dict [ ("type", String _); ("id", Int i) ]) ->
+          Var (id, i)
+    | Type.Arrow _,_ -> failwith "Unmarshalling of functional values not yet implemented"
+    | ty,v -> failwith (Printf.sprintf "of_typed_value: unknown type=%s value=%s" 
+                (Type.to_string ty) (Value.to_string v))
+
 let to_buffer t buf =
 	to_fct t (fun s -> Buffer.add_string buf s)
 
@@ -539,4 +580,5 @@ end
 let of_string ty s =
 	count := 0L;
 	of_typed_value (ty, Parser.of_string s)
+
 
