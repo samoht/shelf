@@ -16,3 +16,10 @@ package "json" (
   archive(byte) = "json.cmo"
   archive(native) = "json.cmx"
 )
+
+package "html" (
+  name = "shelf.html"
+  description = "HTML output"
+  archive(byte) = "html.cmo"
+  archive(native) = "html.cmx"
+)
