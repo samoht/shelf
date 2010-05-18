@@ -5,11 +5,11 @@ ANNOTATE = yes
 run: dc
 	./$(RESULT) -verbose
 
-PACKS = unix oUnit dyntype.value dyntype.syntax shelf.syntax shelf.json
+PACKS = unix oUnit dyntype.value dyntype.syntax shelf.syntax shelf.json shelf.html
 PREDS = camlp4o
 
 RESULT= run_test
-TESTS=  test_json_simple test_json test_blog
+TESTS=  test_json_simple test_json test_blog test_html
 
 SOURCES= $(TESTS:%=%.ml) suite.ml
 

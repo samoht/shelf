@@ -5,6 +5,7 @@ let suites = [
   Test_json_simple.suite;
   Test_blog.suite;
   Test_json.suite;
+  Test_html.suite;
 ]
 
 let _ =
