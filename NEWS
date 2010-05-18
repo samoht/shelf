@@ -1,5 +1,6 @@
 0.1.0-dev:
 
+* experimental HTML generation support [18 May 2010]
 * Fix serialization and deserialization of cyclic values [17 May 2010]
 * Let JSON floats also come in as strings [20 Apr 2010]
 * Support different permutation of JSON dict keys [20 Apr 2010]
