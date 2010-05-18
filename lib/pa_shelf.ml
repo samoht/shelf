@@ -27,8 +27,8 @@ module Json = struct
 	let gen_both (n, ty) =
 		let _loc = loc_of_ctyp ty in
 		[
-			<:binding< $lid:json_of n$ x = Json.to_small_string ($lid:P4_value.value_of n$ x) >>;
-			<:binding< $lid:of_json n$ x = $lid:P4_value.of_value n$ (Json.of_string x) >>;
+			<:binding< $lid:json_of n$ x = Json.to_string ($lid:P4_value.value_of n$ x) >>;
+			<:binding< $lid:of_json n$ x = $lid:P4_value.of_value n$ (Json.of_string $lid:P4_type.type_of n$ x) >>;
 		]
 end
 
@@ -49,6 +49,7 @@ let _ =
 			let _loc = loc_of_ctyp tds in
 			<:str_item<
 				$P4_value.gen tds$;
+				$P4_type.gen tds$;
 				value $biAnd_of_list (List.flatten (List.map Json.gen_both (P4_value.list_of_ctyp_decl tds)))$; 
 			>>
 		);
